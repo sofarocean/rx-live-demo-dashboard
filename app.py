@@ -44,6 +44,8 @@ def hex_to_struct(hex_data, struct_description):
     return {name: val.decode() if isinstance(val, bytes) else val
             for (_, name), val in zip(struct_description, values)}
 
+st.set_page_config(layout="wide")
+
 # Streamlit UI
 st.title("Bristlemouth Rx-LIVE Acoustic Tag Detections")
 
