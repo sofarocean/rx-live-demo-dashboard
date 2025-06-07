@@ -1,0 +1,8 @@
+[flake8]
+ignore = E402,E704,W503,E501,E203,W605
+exclude =
+    .venv,
+    .git,
+    __pycache__,
+    **/__pycache__
+--max-complexity=10
