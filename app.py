@@ -45,7 +45,7 @@ def hex_to_struct(hex_data, struct_description):
             for (_, name), val in zip(struct_description, values)}
 
 # Streamlit UI
-st.title("Bristlemouth Acoustic Tag Detections")
+st.title("Bristlemouth Rx-LIVE Acoustic Tag Detections")
 
 spotter_id = st.text_input("Spotter ID", "SPOT-32255C")
 api_token = st.text_input("API Token", "YOUR_SPOTTER_API_TOKEN")
@@ -81,11 +81,11 @@ if st.button("Fetch & Decode Data"):
                         continue  # skip this detection
 
                     decoded.update({
-                        'timestamp': format_timestamp(point['timestamp'], to_local=local_time),
-                        'tag': tag_string,
-                        'lat': point['latitude'],
-                        'lon': point['longitude'],
-                        'status_count': count,
+                        'time': format_timestamp(point['timestamp'], to_local=local_time),
+                        'tag_string': tag_string,
+                        'detection_count': decoded['detection_count'],
+                        'latitude': point['latitude'],
+                        'longitude': point['longitude']
                     })
                     if decoded:
                         detections.append(decoded)
@@ -94,6 +94,7 @@ if st.button("Fetch & Decode Data"):
                             popup=f"{decoded['tag_serial_no']} ({decoded['code_char']}) @ {point['timestamp']}",
                         ).add_to(cluster)
             except Exception as e:
+                print(e)
                 continue
 
         st.write(f"Found {len(detections)} detection(s).")
@@ -101,21 +102,21 @@ if st.button("Fetch & Decode Data"):
         # Sort by timestamp descending (assumes formatted timestamp is lexically sortable)
         sorted_detections = sorted(
             detections,
-            key=lambda d: d['timestamp'],
+            key=lambda d: d['time'],
             reverse=True
         )
 
         # Render the table
-        st.write("### Detection Table (Most Recent First)")
+        st.write("### Detections Table")
         st.dataframe([
             {
-                'Tag': d['tag'],
-                'Time': d['timestamp'],
-                'Lat': f"{d['lat']:.5f}",
-                'Lon': f"{d['lon']:.5f}",
+                'Tag ID': d['tag_string'],
+                'Pings': d['detection_count'],
+                'Time': d['time'],
+                'Latitude': f"{d['latitude']:.5f}",
+                'Longitude': f"{d['longitude']:.5f}",
             }
             for d in sorted_detections
         ])
 
-        st.components.v1.html(m._repr_html_(), height=500)
-
+        st.components.v1.html(m._repr_html_(), height=720, width=1024)
