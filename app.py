@@ -98,7 +98,7 @@ if st.button("Fetch & Decode Data"):
                 continue
 
         st.write(f"Found {len(detections)} detection(s).")
-        st.write("### Detection Table")
+
         # Sort by timestamp descending (assumes formatted timestamp is lexically sortable)
         sorted_detections = sorted(
             detections,

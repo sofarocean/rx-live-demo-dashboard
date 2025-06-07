@@ -3,3 +3,7 @@ Python Streamlit app for viewing acoustic tag detections on a simple map dashboa
 
 ## How to Use
 Run locally with: `streamlit run app.py`
+
+Demo is deployed at: `https://bristlemouth-rx-live-demo.streamlit.app/`
+
+## Dev Notes
