@@ -5,6 +5,6 @@ This is part of the Bristlemouth example sensor integration project for RS-485 s
 ## How to Use
 Run locally with: `streamlit run app.py`
 
-Demo is deployed at: `https://bristlemouth-rx-live-demo.streamlit.app/`
+Public demo of this app is deployed here: [Bristlemouth Rx-LIVE Demo](https://bristlemouth-rx-live-demo.streamlit.app/)
 
 ## Dev Notes
