@@ -1,12 +1,12 @@
-import streamlit as st
-import requests
+import struct
+from datetime import UTC, datetime, timedelta
+
 import folium
 import pandas as pd
+import requests
+import streamlit as st
 from bitstring import BitStream
-import struct
 from folium.plugins import MarkerCluster
-from datetime import datetime, timezone, timedelta
-import pytz
 
 # Detection unpacking schema
 DETECT_STRUCT = [
@@ -25,11 +25,11 @@ def serialize_tag_struct(tag: dict) -> str:
 
 
 def format_timestamp(ts, to_local=False):
-    dt = datetime.fromisoformat(ts.replace('Z', '+00:00'))
+    dt = datetime.fromisoformat(ts)
     if to_local:
         return dt.astimezone().strftime('%Y-%m-%d %H:%M %Z')
     else:
-        return dt.astimezone(timezone.utc).strftime('%Y-%m-%d %H:%M UTC')
+        return dt.astimezone(UTC).strftime('%Y-%m-%d %H:%M UTC')
 
 
 # Decoder
@@ -50,7 +50,7 @@ st.set_page_config(layout="wide")
 # Streamlit UI
 st.title("Bristlemouth Rx-LIVE Acoustic Tag Detections")
 
-default_start = (datetime.now(timezone.utc) - timedelta(days=30)).strftime('%Y-%m-%dT%H:%MZ')
+default_start = (datetime.now(UTC) - timedelta(days=30)).strftime('%Y-%m-%dT%H:%MZ')
 
 spotter_id = st.text_input("Spotter ID", "SPOT-32255C")
 api_token = st.text_input("API Token", "YOUR_SPOTTER_API_TOKEN")
@@ -74,7 +74,7 @@ if st.button("Fetch & Decode Data"):
         detections = []
         for point in r.json().get('data', []):
             try:
-                ts_raw = datetime.fromisoformat(point['timestamp'].replace('Z', '+00:00'))
+                ts_raw = datetime.fromisoformat(point['timestamp'])
                 bitstream = BitStream('0x' + point['value'])
                 count = bitstream.read('uintle:32')
                 while bitstream.pos < bitstream.len:
@@ -95,7 +95,8 @@ if st.button("Fetch & Decode Data"):
                     })
                     if decoded:
                         detections.append(decoded)
-            except Exception as e:
+            # Skip malformed points rather than failing the whole fetch.
+            except Exception as e:  # noqa: BLE001
                 print(e)
                 continue
         st.session_state['detections'] = detections
