@@ -5,6 +5,7 @@ the Sofar API with synthetic Rx-LIVE payloads, so the full decode -> map ->
 chart -> table path is exercised without network access or an API token.
 """
 
+import logging
 import struct
 from pathlib import Path
 from unittest import mock
@@ -56,6 +57,18 @@ def mock_api():
         yield get
 
 
+@pytest.fixture
+def deprecation_warnings():
+    """Collect everything Streamlit logs through its deprecation helper."""
+    records = []
+    handler = logging.Handler()
+    handler.emit = records.append
+    logger = logging.getLogger("streamlit.deprecation_util")
+    logger.addHandler(handler)
+    yield records
+    logger.removeHandler(handler)
+
+
 def fetch(at):
     at.button[0].click().run()
     assert not at.exception, at.exception
@@ -91,7 +104,25 @@ def test_fetch_includes_reference_tag_when_not_excluded(mock_api):
     assert REFERENCE_TAG in set(at.dataframe[0].value["Tag ID"])
 
 
+def test_map_renders_in_iframe(mock_api):
+    at = fetch(AppTest.from_file(APP_PATH, default_timeout=60).run())
+
+    iframes = at.get("iframe")
+    assert len(iframes) == 1
+    html = iframes[0].proto.srcdoc
+    assert "leaflet" in html.lower()
+    assert html.count("L.marker(") == 2  # one per non-reference detection
+
+
 def test_chart_resolution_toggle(mock_api):
     at = fetch(AppTest.from_file(APP_PATH, default_timeout=60).run())
     at.radio[0].set_value("1 Week").run()
     assert not at.exception, at.exception
+
+
+def test_no_streamlit_deprecation_warnings(mock_api, deprecation_warnings):
+    # streamlit is unpinned, so this flags newly deprecated APIs in CI before
+    # a future release removes them and breaks the deployed app.
+    at = fetch(AppTest.from_file(APP_PATH, default_timeout=60).run())
+    at.radio[0].set_value("1 Week").run()
+    assert not deprecation_warnings, [r.getMessage() for r in deprecation_warnings]

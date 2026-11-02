@@ -119,7 +119,7 @@ if 'detections' in st.session_state:
                 location=[d['latitude'], d['longitude']],
                 popup=f"{d['tag_serial_no']} ({d['code_char']}) @ {d['time']}",
             ).add_to(cluster)
-        st.components.v1.html(m._repr_html_(), height=500)
+        st.iframe(m._repr_html_(), height=500)
 
     with col2:
         st.write("### Unique Tags Over Time")
