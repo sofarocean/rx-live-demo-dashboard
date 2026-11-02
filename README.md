@@ -8,3 +8,9 @@ Run locally with: `streamlit run app.py`
 Public demo of this app is deployed here: [Bristlemouth Rx-LIVE Demo](https://bristlemouth-rx-live-demo.streamlit.app/)
 
 ## Dev Notes
+Lint and test locally (same as CI):
+```
+pip install -r requirements-dev.txt
+ruff check .
+pytest
+```
