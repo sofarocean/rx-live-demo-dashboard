@@ -1,5 +1,5 @@
 streamlit>=1.32
 folium>=0.15
 requests>=2.31
-bitstring>=4.1
+bitstring>=4.1,<5
 pytz>=2024.1
